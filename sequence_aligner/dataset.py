@@ -1,5 +1,5 @@
 from typing import List, Any
-
+import torch
 from torch.utils.data import Dataset
 from transformers import PreTrainedTokenizerFast
 from typing_extensions import TypedDict
@@ -15,13 +15,14 @@ class ExpectedDataItemShape(TypedDict):
     content:str # The Text to be annotated
     annotations :List[ExpectedAnnotationShape]
 
-class TrainingDataset(Dataset):
+class NewTrainingDataset(Dataset):
     ''''''
     def __init__(
         self,
         data: Any,
         label_set: LabelSet,
         tokenizer: PreTrainedTokenizerFast,
+        device,
         tokens_per_batch=32,
         window_stride=None,
     ):
@@ -31,6 +32,7 @@ class TrainingDataset(Dataset):
         self.tokenizer = tokenizer
         self.texts = []
         self.annotations = []
+        self.device=device
 
         for example in data:
             self.texts.append(example["content"])
@@ -81,5 +83,9 @@ class TrainingDataset(Dataset):
         return len(self.training_examples)
 
     def __getitem__(self, idx) -> TrainingExample:
-
-        return self.training_examples[idx]
+        exp = self.training_examples[idx]
+        return {
+            "input_ids": torch.tensor(exp.input_ids).to(self.device),
+            "attention_masks": torch.tensor(exp.attention_masks).to(self.device),
+            "labels": torch.tensor(exp.labels).to(self.device),
+        }
