@@ -15,7 +15,7 @@ class ExpectedDataItemShape(TypedDict):
     content:str # The Text to be annotated
     annotations :List[ExpectedAnnotationShape]
 
-class NewTrainingDataset(Dataset):
+class TrainingDataset(Dataset):
     ''''''
     def __init__(
         self,
@@ -85,7 +85,7 @@ class NewTrainingDataset(Dataset):
     def __getitem__(self, idx) -> TrainingExample:
         exp = self.training_examples[idx]
         return {
-            "input_ids": torch.tensor(exp.input_ids).to(self.device),
-            "attention_masks": torch.tensor(exp.attention_masks).to(self.device),
-            "labels": torch.tensor(exp.labels).to(self.device),
+            "input_ids": torch.tensor(exp.input_ids),
+            "attention_masks": torch.tensor(exp.attention_masks),
+            "labels": torch.tensor(exp.labels),
         }
